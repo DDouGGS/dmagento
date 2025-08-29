@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+   app:
+      build: .
+      container_name: dmagento
+      volumes:
+         - ./:/var/www/html
+      ports:
+         - 80:80  
+      depends_on:
+         - database
+   database:
+      image: mysql:latest
+      container_name: banco
+      restart: always
+      environment:
+         MYSQL_USER: douggonsouza
+         MYSQL_PASSWORD: dev@7900012
+         MYSQL_DATABASE: dmagento
+         MYSQL_ROOT_PASSWORD: dev@7900012
+      ports:
+         - '3306:3306'
+      volumes:
+         - db_data:/var/lib/mysql
+#- ./db/init.sql:/docker-entrypoint-initdb.d/
+volumes:
+   db_data:

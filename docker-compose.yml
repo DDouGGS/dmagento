@@ -1,0 +1,82 @@
+version: '3.7'
+services:
+   app:
+      build: .
+      container_name: dmagento
+      volumes:
+         - ./:/var/www/html
+      ports:
+         - 80:80
+         - 443:443
+      networks:
+         - ecommerce
+      depends_on:
+         - database
+         # - elasticsearch
+         - opensearch
+   database:
+      image: mysql/mysql-server:8.0
+      container_name: mysql8
+      restart: on-failure
+      environment:
+         MYSQL_USER: douggonsouza
+         MYSQL_PASSWORD: dev@7900012
+         MYSQL_DATABASE: dmagento
+         MYSQL_ROOT_PASSWORD: dev@7900012
+      ports:
+         - 3306:3306
+      volumes:
+         - db_data:/var/lib/mysql
+      networks:
+         - ecommerce
+   # elasticsearch:
+   #    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.0
+   #    container_name: elasticsearch8-4-0.com
+   #    restart: on-failure
+   #    environment: ['ES_JAVA_OPTS=-Xms2g -Xmx2g','bootstrap.memory_lock=true','discovery.type=single-node','xpack.security.enabled=false', 'xpack.security.enrollment.enabled=false']
+   #    ports:
+   #       - 9200:9200
+   #       - 9300:9300
+   #    networks:
+   #       - ecommerce
+   #    ulimits:
+   #       memlock:
+   #          soft: -1
+   #          hard: -1
+   #       nofile:
+   #          soft: 65536
+   #          hard: 65536
+   opensearch:
+      image: opensearchproject/opensearch:latest
+      container_name: opensearch
+      restart: on-failure
+      environment:
+         - cluster.name=opensearch-cluster
+         - node.name=opensearch
+         - discovery.type=single-node
+         - bootstrap.memory_lock=true
+         - discovery.seed_hosts=opensearch
+         - "ES_JAVA_OPTS=-Xms750m -Xmx750m"
+         - "DISABLE_SECURITY_PLUGIN=true"
+         - "DISABLE_INSTALL_DEMO_CONFIG=true"
+         - OPENSEARCH_INITIAL_ADMIN_PASSWORD=dev@7900012
+      command: ["opensearch", "-Elogger.level=INFO"]
+      volumes:
+         - opensearch-data:/usr/share/opensearch/data
+      ports:
+         - 9200:9200
+         - 9600:9600
+      networks:
+         - ecommerce
+      ulimits:
+         memlock:
+            soft: -1
+            hard: -1
+         nofile:
+            soft: 65536
+            hard: 65536
+volumes:
+   db_data:
+   opensearch-data:
+networks:
+   ecommerce:
